@@ -2,6 +2,18 @@
 // Uses hardcoded coordinates for common cities (fast), fallback to geocoding API (universal)
 
 const CITY_COORDINATES = {
+    // Taiwan
+    '台北': { lat: 25.0330, lon: 121.5654 },
+    'taipei': { lat: 25.0330, lon: 121.5654 },
+    '臺北': { lat: 25.0330, lon: 121.5654 },
+    '台中': { lat: 24.1477, lon: 120.6736 },
+    'taichung': { lat: 24.1477, lon: 120.6736 },
+    '臺中': { lat: 24.1477, lon: 120.6736 },
+    '高雄': { lat: 22.6273, lon: 120.3014 },
+    'kaohsiung': { lat: 22.6273, lon: 120.3014 },
+    '台南': { lat: 22.9908, lon: 120.2133 },
+    'tainan': { lat: 22.9908, lon: 120.2133 },
+    '臺南': { lat: 22.9908, lon: 120.2133 },
     // Shikoku (Japan)
     '高松': { lat: 34.3428, lon: 134.0434 },
     'takamatsu': { lat: 34.3428, lon: 134.0434 },
