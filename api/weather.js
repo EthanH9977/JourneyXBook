@@ -14,6 +14,25 @@ const CITY_COORDINATES = {
     '台南': { lat: 22.9908, lon: 120.2133 },
     'tainan': { lat: 22.9908, lon: 120.2133 },
     '臺南': { lat: 22.9908, lon: 120.2133 },
+    // Japan - Major regions
+    '北海道': { lat: 43.0642, lon: 141.3469 }, // Sapporo center
+    'hokkaido': { lat: 43.0642, lon: 141.3469 },
+    '札幌': { lat: 43.0642, lon: 141.3469 },
+    'sapporo': { lat: 43.0642, lon: 141.3469 },
+    '東京': { lat: 35.6762, lon: 139.6503 },
+    'tokyo': { lat: 35.6762, lon: 139.6503 },
+    '大阪': { lat: 34.6937, lon: 135.5023 },
+    'osaka': { lat: 34.6937, lon: 135.5023 },
+    '京都': { lat: 35.0116, lon: 135.7681 },
+    'kyoto': { lat: 35.0116, lon: 135.7681 },
+    '名古屋': { lat: 35.1815, lon: 136.9066 },
+    'nagoya': { lat: 35.1815, lon: 136.9066 },
+    '福岡': { lat: 33.5904, lon: 130.4017 },
+    'fukuoka': { lat: 33.5904, lon: 130.4017 },
+    '沖繩': { lat: 26.2124, lon: 127.6809 },
+    'okinawa': { lat: 26.2124, lon: 127.6809 },
+    '那霸': { lat: 26.2124, lon: 127.6809 },
+    'naha': { lat: 26.2124, lon: 127.6809 },
     // Shikoku (Japan)
     '高松': { lat: 34.3428, lon: 134.0434 },
     'takamatsu': { lat: 34.3428, lon: 134.0434 },
@@ -32,14 +51,7 @@ const CITY_COORDINATES = {
     '觀音寺': { lat: 34.1290, lon: 133.6630 },
     'kanonji': { lat: 34.1290, lon: 133.6630 },
     '丸龜': { lat: 34.2899, lon: 133.7975 },
-    'marugame': { lat: 34.2899, lon: 133.7975 },
-    // Common cities (can add more)
-    '東京': { lat: 35.6762, lon: 139.6503 },
-    'tokyo': { lat: 35.6762, lon: 139.6503 },
-    '大阪': { lat: 34.6937, lon: 135.5023 },
-    'osaka': { lat: 34.6937, lon: 135.5023 },
-    '京都': { lat: 35.0116, lon: 135.7681 },
-    'kyoto': { lat: 35.0116, lon: 135.7681 }
+    'marugame': { lat: 34.2899, lon: 133.7975 }
 };
 
 export default async function handler(req, res) {
