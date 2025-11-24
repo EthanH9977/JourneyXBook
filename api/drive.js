@@ -1,6 +1,6 @@
 import { google } from 'googleapis';
 
-const SCOPES = ['https://www.googleapis.com/auth/drive']; 
+const SCOPES = ['https://www.googleapis.com/auth/drive'];
 const ROOT_FOLDER_NAME = 'TravelBook';
 
 // Helper: robust key cleaning for Vercel Env Vars
@@ -39,13 +39,13 @@ export default async function handler(req, res) {
     const getRootId = async () => {
       // Vital: supportsAllDrives=true allows the bot to see folders shared with it
       const q = `name = '${ROOT_FOLDER_NAME}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
-      const response = await drive.files.list({ 
-        q, 
+      const response = await drive.files.list({
+        q,
         fields: 'files(id, name)',
-        supportsAllDrives: true, 
-        includeItemsFromAllDrives: true 
+        supportsAllDrives: true,
+        includeItemsFromAllDrives: true
       });
-      
+
       if (response.data.files.length > 0) {
         return response.data.files[0].id;
       }
@@ -56,13 +56,13 @@ export default async function handler(req, res) {
     const getUserFolderId = async (rootId, user) => {
       // STRICT CHECK: The folder MUST be inside the Root Folder
       const q = `name = '${user}' and '${rootId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
-      const response = await drive.files.list({ 
-        q, 
+      const response = await drive.files.list({
+        q,
         fields: 'files(id, name)',
-        supportsAllDrives: true, 
-        includeItemsFromAllDrives: true 
+        supportsAllDrives: true,
+        includeItemsFromAllDrives: true
       });
-      
+
       if (response.data.files.length > 0) {
         return response.data.files[0].id;
       }
@@ -83,19 +83,19 @@ export default async function handler(req, res) {
     // --- Actions ---
 
     if (req.method === 'GET') {
-      
+
       if (action === 'list' && username) {
         const rootId = await getRootId();
-        
+
         if (!rootId) {
-            return res.status(404).json({ 
-                error: 'ROOT_FOLDER_NOT_FOUND', 
-                serviceAccountEmail: process.env.GOOGLE_CLIENT_EMAIL 
-            });
+          return res.status(404).json({
+            error: 'ROOT_FOLDER_NOT_FOUND',
+            serviceAccountEmail: process.env.GOOGLE_CLIENT_EMAIL
+          });
         }
 
         const userFolderId = await getUserFolderId(rootId, username);
-        
+
         const fileListRes = await drive.files.list({
           q: `'${userFolderId}' in parents and mimeType = 'application/json' and trashed = false`,
           fields: 'files(id, name)',
@@ -120,15 +120,15 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'POST') {
-      const { data } = req.body; 
-      
+      const { data } = req.body;
+
       if (!data) return res.status(400).json({ error: 'No data provided' });
 
       // Update existing
       if (fileId) {
         await drive.files.update({
           fileId: fileId,
-          requestBody: {}, 
+          requestBody: {},
           media: {
             mimeType: 'application/json',
             body: JSON.stringify(data, null, 2)
@@ -137,31 +137,41 @@ export default async function handler(req, res) {
         });
         return res.status(200).json({ id: fileId });
       }
-      
+
       // Create New
       if (fileName && folderId) {
         const name = fileName.endsWith('.json') ? fileName : `${fileName}.json`;
-        const createRes = await drive.files.create({
-          requestBody: {
-            name: name,
-            mimeType: 'application/json',
-            parents: [folderId] // Verify this matches userFolderId
-          },
-          media: {
-            mimeType: 'application/json',
-            body: JSON.stringify(data, null, 2)
-          },
-          fields: 'id, parents', // Request parents back to verify
-          supportsAllDrives: true
-        });
-        
-        // Sanity Check
-        const createdFile = createRes.data;
-        if (!createdFile.parents || !createdFile.parents.includes(folderId)) {
-             console.warn(`File created but parent mismatch. Expected ${folderId}, got ${createdFile.parents}`);
-        }
 
-        return res.status(200).json({ id: createdFile.id });
+        try {
+          const createRes = await drive.files.create({
+            requestBody: {
+              name: name,
+              mimeType: 'application/json',
+              parents: [folderId], // Must be a folder shared with the Service Account
+              writersCanShare: false // Prevent ownership issues
+            },
+            media: {
+              mimeType: 'application/json',
+              body: JSON.stringify(data, null, 2)
+            },
+            fields: 'id, parents',
+            supportsAllDrives: true
+          });
+
+          // Sanity Check
+          const createdFile = createRes.data;
+          if (!createdFile.parents || !createdFile.parents.includes(folderId)) {
+            console.warn(`File created but parent mismatch. Expected ${folderId}, got ${createdFile.parents}`);
+          }
+
+          return res.status(200).json({ id: createdFile.id });
+        } catch (createError) {
+          console.error('File creation error:', createError.message);
+          return res.status(500).json({
+            error: 'Failed to create file. Please ensure the TravelBook folder is properly shared with the Service Account.',
+            details: createError.message
+          });
+        }
       }
     }
 
