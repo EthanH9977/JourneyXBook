@@ -8,14 +8,27 @@
 
 A smart, cloud-synced travel itinerary planner.
 
-## 🚀 Vercel Deployment Setup (Important!)
+## 🚀 Firebase Setup (Important!)
 
-To make the Google Drive integration work, you must set the following **Environment Variables** in your Vercel Project Settings:
+This app uses Firebase Firestore for data storage. The Firebase config is already integrated in the code.
 
-1.  Go to **Settings** -> **Environment Variables**.
-2.  Add `GOOGLE_CLIENT_EMAIL`: The email from your Service Account JSON.
-3.  Add `GOOGLE_PRIVATE_KEY`: The private key from your Service Account JSON (copy the whole string including `-----BEGIN...`).
-4.  **Redeploy** your project for changes to take effect.
+### Data Structure
+- Users can create and manage their own itineraries
+- Data is stored in Firestore under: `/users/{username}/itineraries/{tripId}`
+- All data is synced in real-time
+
+### Firestore Rules
+Make sure your Firestore is in **test mode** for development, or set up proper security rules:
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/itineraries/{document=**} {
+      allow read, write: if true; // Change this for production
+    }
+  }
+}
+```
 
 View your app in AI Studio: https://ai.studio/apps/drive/1cUPNjM00FhoV7eIIvNfP_LR-6EPRMK8m
 

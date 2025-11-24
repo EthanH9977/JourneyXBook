@@ -10,12 +10,12 @@ import SettingsView from './components/SettingsView';
 import { SHIKOKU_DEMO_DATA, generateEmptyItinerary } from './constants';
 import { ItineraryItem, DayItinerary, EventType } from './types';
 import { Plus, Loader2 } from 'lucide-react';
-import { 
+import {
   loginAndListFiles,
-  loadFromDrive, 
-  saveToDrive,
-  DriveFile
-} from './services/googleDriveService';
+  loadFromFirebase,
+  saveToFirebase,
+  FirebaseFile
+} from './services/firebaseService';
 
 const STORAGE_KEY = 'shikoku_travel_itinerary_v1';
 const USER_KEY = 'shikoku_travel_user';
@@ -28,17 +28,17 @@ const App: React.FC = () => {
   // Data State
   const [itinerary, setItinerary] = useState<DayItinerary[]>(SHIKOKU_DEMO_DATA);
   const [currentDayId, setCurrentDayId] = useState<number>(1);
-  
+
   // App Flow State
   const [appState, setAppState] = useState<AppState>('select_user');
   const [isOfflineMode, setIsOfflineMode] = useState(false);
-  
+
   // Drive State
   const [currentUser, setCurrentUser] = useState<string | null>(null);
   const [userFolderId, setUserFolderId] = useState<string | null>(null);
   const [currentFileId, setCurrentFileId] = useState<string | null>(null);
   const [currentFileName, setCurrentFileName] = useState<string | null>(null);
-  const [availableFiles, setAvailableFiles] = useState<DriveFile[]>([]);
+  const [availableFiles, setAvailableFiles] = useState<FirebaseFile[]>([]);
   const [driveLoading, setDriveLoading] = useState(false);
 
   // Modal states
@@ -52,7 +52,7 @@ const App: React.FC = () => {
     // Check if we have a cached user
     const cachedUser = localStorage.getItem(USER_KEY);
     if (cachedUser) {
-        handleUserLogin(cachedUser);
+      handleUserLogin(cachedUser);
     }
   }, []);
 
@@ -62,13 +62,13 @@ const App: React.FC = () => {
     try {
       // Fetch user folder and files via Vercel API
       const { userFolderId, files, isMock } = await loginAndListFiles(username);
-      
+
       setIsOfflineMode(isMock);
       setCurrentUser(username);
       setUserFolderId(userFolderId);
       setAvailableFiles(files);
       localStorage.setItem(USER_KEY, username);
-      
+
       setAppState('select_file');
     } catch (e: any) {
       console.error("Login failed", e);
@@ -82,7 +82,7 @@ const App: React.FC = () => {
   const handleSelectFile = async (fileId: string, fileName: string) => {
     setAppState('loading_file');
     try {
-      const data = await loadFromDrive(fileId);
+      const data = await loadFromFirebase(currentUser!, fileId);
       if (Array.isArray(data)) {
         setItinerary(data);
         setCurrentFileId(fileId);
@@ -102,13 +102,13 @@ const App: React.FC = () => {
     setDriveLoading(true);
     try {
       if (!userFolderId) throw new Error("No user folder");
-      
+
       // Generate blank itinerary based on user input
       const newItinerary = generateEmptyItinerary(days, startDate);
-      
+
       // Save it immediately to get an ID (Mock or Real)
-      const newFileId = await saveToDrive(newItinerary, fileName, userFolderId, null);
-      
+      const newFileId = await saveToFirebase(currentUser!, newItinerary, fileName, null);
+
       setItinerary(newItinerary);
       setCurrentFileId(newFileId);
       setCurrentFileName(fileName);
@@ -123,68 +123,68 @@ const App: React.FC = () => {
 
   const handleManualSync = async () => {
     if (!currentFileId || !userFolderId || !currentFileName) {
-        alert("尚未連接雲端檔案");
-        return;
+      alert("尚未連接雲端檔案");
+      return;
     }
-    
+
     const loadingToast = document.createElement('div');
     loadingToast.className = "fixed top-4 left-1/2 -translate-x-1/2 bg-stone-800 text-white px-4 py-2 rounded-full text-sm z-50 animate-in fade-in";
     loadingToast.innerText = isOfflineMode ? "正在儲存至本地..." : "正在同步至 Google Drive...";
     document.body.appendChild(loadingToast);
 
     try {
-        const newId = await saveToDrive(itinerary, currentFileName, userFolderId, currentFileId);
-        
-        // Critical: Update the file ID if it changed (e.g. from Mock to Real Cloud ID)
-        if (newId !== currentFileId) {
-            console.log(`File ID updated: ${currentFileId} -> ${newId}`);
-            setCurrentFileId(newId);
-        }
+      const newId = await saveToFirebase(currentUser!, itinerary, currentFileName, currentFileId);
 
-        loadingToast.innerText = "儲存成功！";
-        loadingToast.className = "fixed top-4 left-1/2 -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded-full text-sm z-50";
+      // Critical: Update the file ID if it changed (e.g. from Mock to Real Cloud ID)
+      if (newId !== currentFileId) {
+        console.log(`File ID updated: ${currentFileId} -> ${newId}`);
+        setCurrentFileId(newId);
+      }
+
+      loadingToast.innerText = "儲存成功！";
+      loadingToast.className = "fixed top-4 left-1/2 -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded-full text-sm z-50";
     } catch (e: any) {
-        console.error(e);
-        loadingToast.innerText = `儲存失敗: ${e.message}`;
-        loadingToast.className = "fixed top-4 left-1/2 -translate-x-1/2 bg-red-600 text-white px-4 py-2 rounded-full text-sm z-50";
+      console.error(e);
+      loadingToast.innerText = `儲存失敗: ${e.message}`;
+      loadingToast.className = "fixed top-4 left-1/2 -translate-x-1/2 bg-red-600 text-white px-4 py-2 rounded-full text-sm z-50";
     } finally {
-        setTimeout(() => document.body.removeChild(loadingToast), 2000);
+      setTimeout(() => document.body.removeChild(loadingToast), 2000);
     }
   };
 
   // --- Structure Management ---
 
   const handleAddDay = () => {
-     setItinerary(prev => {
-        const lastDay = prev[prev.length - 1];
-        const nextDate = new Date(lastDay.dateStr);
-        nextDate.setDate(nextDate.getDate() + 1);
-        
-        const yyyy = nextDate.getFullYear();
-        const mm = String(nextDate.getMonth() + 1).padStart(2, '0');
-        const dd = String(nextDate.getDate()).padStart(2, '0');
-        const weekDays = ["(日)", "(一)", "(二)", "(三)", "(四)", "(五)", "(六)"];
-        
-        const newDay: DayItinerary = {
-            dayId: lastDay.dayId + 1,
-            dateStr: `${yyyy}-${mm}-${dd}`,
-            displayDate: `${nextDate.getMonth() + 1}/${nextDate.getDate()} ${weekDays[nextDate.getDay()]}`,
-            region: "待定地點",
-            events: []
-        };
-        return [...prev, newDay];
-     });
-     alert("已新增一天至行程最後");
+    setItinerary(prev => {
+      const lastDay = prev[prev.length - 1];
+      const nextDate = new Date(lastDay.dateStr);
+      nextDate.setDate(nextDate.getDate() + 1);
+
+      const yyyy = nextDate.getFullYear();
+      const mm = String(nextDate.getMonth() + 1).padStart(2, '0');
+      const dd = String(nextDate.getDate()).padStart(2, '0');
+      const weekDays = ["(日)", "(一)", "(二)", "(三)", "(四)", "(五)", "(六)"];
+
+      const newDay: DayItinerary = {
+        dayId: lastDay.dayId + 1,
+        dateStr: `${yyyy}-${mm}-${dd}`,
+        displayDate: `${nextDate.getMonth() + 1}/${nextDate.getDate()} ${weekDays[nextDate.getDay()]}`,
+        region: "待定地點",
+        events: []
+      };
+      return [...prev, newDay];
+    });
+    alert("已新增一天至行程最後");
   };
 
   const handleRemoveDay = () => {
-     if (itinerary.length <= 1) {
-         alert("至少需要保留一天");
-         return;
-     }
-     if (window.confirm("確定要刪除最後一天的行程嗎？裡面的活動也會被刪除。")) {
-         setItinerary(prev => prev.slice(0, -1));
-     }
+    if (itinerary.length <= 1) {
+      alert("至少需要保留一天");
+      return;
+    }
+    if (window.confirm("確定要刪除最後一天的行程嗎？裡面的活動也會被刪除。")) {
+      setItinerary(prev => prev.slice(0, -1));
+    }
   };
 
   // --- Local Data Handlers ---
@@ -212,8 +212,8 @@ const App: React.FC = () => {
           const parsed = JSON.parse(result);
           if (Array.isArray(parsed)) {
             if (window.confirm("這將會覆蓋您目前的行程資料，確定要刪除嗎？")) {
-               setItinerary(parsed);
-               alert("行程匯入成功！");
+              setItinerary(parsed);
+              alert("行程匯入成功！");
             }
           }
         } catch (error) {
@@ -232,7 +232,7 @@ const App: React.FC = () => {
   const handleAddNewItem = () => {
     setIsAddingNew(true);
     setEditingItem({
-      id: `new-${Date.now()}`, 
+      id: `new-${Date.now()}`,
       time: "09:00",
       title: "",
       locationName: "",
@@ -279,8 +279,8 @@ const App: React.FC = () => {
   if (appState === 'select_user') {
     return (
       <div className="min-h-screen bg-washi flex items-center justify-center">
-        <UserModal 
-          onConfirm={handleUserLogin} 
+        <UserModal
+          onConfirm={handleUserLogin}
           isLoading={driveLoading}
         />
       </div>
@@ -297,8 +297,8 @@ const App: React.FC = () => {
           onCreate={handleCreateFile}
           isLoading={driveLoading}
           onSwitchUser={() => {
-              localStorage.removeItem(USER_KEY);
-              setAppState('select_user');
+            localStorage.removeItem(USER_KEY);
+            setAppState('select_user');
           }}
           isOfflineMode={isOfflineMode}
         />
@@ -318,17 +318,17 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen pb-32 font-sans text-shikoku-ink bg-washi bg-fixed">
       {/* Hidden File Input for Import (Shared) */}
-      <input 
-        type="file" 
-        ref={fileInputRef} 
-        onChange={handleImport} 
-        accept=".json" 
-        className="hidden" 
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleImport}
+        accept=".json"
+        className="hidden"
       />
 
       {currentDayId === SETTINGS_DAY_ID ? (
         // --- Settings Page View ---
-        <SettingsView 
+        <SettingsView
           currentUser={currentUser}
           currentFileName={currentFileName}
           onSwitchUser={() => { localStorage.removeItem(USER_KEY); setAppState('select_user'); }}
@@ -344,7 +344,7 @@ const App: React.FC = () => {
       ) : (
         // --- Normal Timeline View ---
         <>
-          <Hero 
+          <Hero
             dayStr={currentDay.displayDate}
             region={currentDay.region}
             dateStr={currentDay.dateStr}
@@ -355,7 +355,7 @@ const App: React.FC = () => {
             <div className="absolute left-[78px] top-6 bottom-6 w-[1px] bg-stone-300 border-l border-dashed border-stone-400 -z-10"></div>
             <div className="space-y-6">
               {currentDay.events.map((item, index) => (
-                <TimelineItem 
+                <TimelineItem
                   key={item.id}
                   item={item}
                   isLast={index === currentDay.events.length - 1}
@@ -386,7 +386,7 @@ const App: React.FC = () => {
 
       {/* Global Bottom Navigation */}
       <BottomNav days={itinerary} currentDayId={currentDayId} onSelectDay={setCurrentDayId} />
-      
+
       {/* Modals are global */}
       <EditModal item={editingItem} onClose={() => setEditingItem(null)} onSave={handleSaveItem} onDelete={handleDeleteItem} isNew={isAddingNew} />
       <InfoModal item={viewingItem} onClose={() => setViewingItem(null)} />
