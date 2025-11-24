@@ -63,8 +63,8 @@ const Hero: React.FC<HeroProps> = ({ dayStr, region, dateStr, isOfflineMode }) =
           {/* Vertical Badge (Left of Weather) */}
           {weather && !loading && (
             <div className={`flex flex-col items-center justify-center py-1 px-0.5 rounded border leading-none ${weather.source === 'forecast'
-                ? 'bg-green-500/10 border-green-400/30 text-green-100'
-                : 'bg-amber-500/10 border-amber-400/30 text-amber-100'
+              ? 'bg-green-500/10 border-green-400/30 text-green-100'
+              : 'bg-amber-500/10 border-amber-400/30 text-amber-100'
               }`}>
               <span className="text-[9px] font-medium writing-vertical-rl tracking-widest opacity-80">
                 {weather.source === 'forecast' ? '預報' : '歷史'}
@@ -104,11 +104,11 @@ const Hero: React.FC<HeroProps> = ({ dayStr, region, dateStr, isOfflineMode }) =
 
         {/* Connection Status Indicator */}
         <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full border text-[9px] font-bold ${isOfflineMode
-            ? 'bg-orange-500/20 text-orange-200 border-orange-500/30'
-            : 'bg-emerald-500/20 text-emerald-200 border-emerald-500/30'
+          ? 'bg-orange-500/20 text-orange-200 border-orange-500/30'
+          : 'bg-emerald-500/20 text-emerald-200 border-emerald-500/30'
           }`}>
           {isOfflineMode ? <HardDrive size={10} /> : <Cloud size={10} />}
-          <span>{isOfflineMode ? 'Local' : 'Firebase'}</span>
+          <span>{isOfflineMode ? 'Local' : '雲端'}</span>
         </div>
       </div>
     </div>

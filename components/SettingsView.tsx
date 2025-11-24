@@ -35,8 +35,8 @@ const SettingsView: React.FC<SettingsViewProps> = ({
       <div className="flex items-center justify-between mb-2">
         <h1 className="text-3xl font-bold text-shikoku-indigo tracking-tight">設定與管理</h1>
         <div className={`px-3 py-1 rounded-full text-xs font-bold border ${isOfflineMode
-            ? 'bg-orange-50 text-orange-600 border-orange-200'
-            : 'bg-green-50 text-green-600 border-green-200'
+          ? 'bg-orange-50 text-orange-600 border-orange-200'
+          : 'bg-green-50 text-green-600 border-green-200'
           }`}>
           {isOfflineMode ? '本地模式' : '雲端已連線'}
         </div>
@@ -118,7 +118,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({
           </div>
           <div className="text-left flex-1">
             <span className="block font-bold text-stone-800">手動同步至雲端</span>
-            <span className="text-xs text-stone-500">立即上傳最新變更至 Firebase</span>
+            <span className="text-xs text-stone-500">立即上傳最新變更至雲端</span>
           </div>
           <RefreshCw size={18} className="text-stone-300 group-hover:text-blue-500" />
         </button>
