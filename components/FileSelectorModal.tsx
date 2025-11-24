@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { FileText, Plus, Loader2, Calendar, HardDrive, Clock } from 'lucide-react';
-import { DriveFile } from '../services/googleDriveService';
+import { FirebaseFile } from '../services/firebaseService';
 
 interface FileSelectorModalProps {
-  files: DriveFile[];
+  files: FirebaseFile[];
   username: string;
   onSelect: (fileId: string, fileName: string) => void;
   onCreate: (fileName: string, days: number, startDate: string) => void;
@@ -12,11 +12,11 @@ interface FileSelectorModalProps {
   isOfflineMode: boolean;
 }
 
-const FileSelectorModal: React.FC<FileSelectorModalProps> = ({ 
-  files, 
-  username, 
-  onSelect, 
-  onCreate, 
+const FileSelectorModal: React.FC<FileSelectorModalProps> = ({
+  files,
+  username,
+  onSelect,
+  onCreate,
   isLoading,
   onSwitchUser,
   isOfflineMode
@@ -36,7 +36,7 @@ const FileSelectorModal: React.FC<FileSelectorModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-shikoku-paper/90 backdrop-blur-md animate-in fade-in duration-300">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden border border-stone-100 flex flex-col max-h-[85vh]">
-        
+
         {/* Header */}
         <div className="p-6 border-b border-stone-100 bg-stone-50/50 flex justify-between items-start">
           <div>
@@ -119,47 +119,47 @@ const FileSelectorModal: React.FC<FileSelectorModalProps> = ({
               </div>
 
               <div className="flex gap-2">
-                 <div className="flex-1">
-                    <label className="block text-xs font-bold text-stone-500 mb-1">天數</label>
-                    <div className="relative">
-                        <select 
-                            value={days} 
-                            onChange={(e) => setDays(Number(e.target.value))}
-                            className="w-full p-2 bg-white border border-stone-300 rounded-lg text-sm appearance-none focus:ring-2 focus:ring-shikoku-indigo outline-none"
-                        >
-                            {Array.from({length: 30}, (_, i) => i + 1).map(d => (
-                                <option key={d} value={d}>{d} 天</option>
-                            ))}
-                        </select>
-                        <Clock size={14} className="absolute right-2 top-2.5 text-stone-400 pointer-events-none" />
-                    </div>
-                 </div>
-                 <div className="flex-1">
-                    <label className="block text-xs font-bold text-stone-500 mb-1">出發日期</label>
-                    <input 
-                        type="date" 
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                        className="w-full p-2 bg-white border border-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-shikoku-indigo outline-none"
-                    />
-                 </div>
+                <div className="flex-1">
+                  <label className="block text-xs font-bold text-stone-500 mb-1">天數</label>
+                  <div className="relative">
+                    <select
+                      value={days}
+                      onChange={(e) => setDays(Number(e.target.value))}
+                      className="w-full p-2 bg-white border border-stone-300 rounded-lg text-sm appearance-none focus:ring-2 focus:ring-shikoku-indigo outline-none"
+                    >
+                      {Array.from({ length: 30 }, (_, i) => i + 1).map(d => (
+                        <option key={d} value={d}>{d} 天</option>
+                      ))}
+                    </select>
+                    <Clock size={14} className="absolute right-2 top-2.5 text-stone-400 pointer-events-none" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <label className="block text-xs font-bold text-stone-500 mb-1">出發日期</label>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="w-full p-2 bg-white border border-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-shikoku-indigo outline-none"
+                  />
+                </div>
               </div>
 
               <div className="flex gap-2 pt-1">
-                 <button
-                    type="button"
-                    onClick={() => setIsCreating(false)}
-                    className="flex-1 py-2 text-xs text-stone-500 hover:text-stone-800 border border-stone-200 rounded-lg bg-white"
-                 >
-                    取消
-                 </button>
-                 <button
-                    type="submit"
-                    disabled={isLoading || !newFileName.trim()}
-                    className="flex-[2] py-2 bg-shikoku-indigo text-white font-bold rounded-lg hover:bg-indigo-800 transition-colors disabled:opacity-50 text-sm"
-                 >
-                    建立
-                 </button>
+                <button
+                  type="button"
+                  onClick={() => setIsCreating(false)}
+                  className="flex-1 py-2 text-xs text-stone-500 hover:text-stone-800 border border-stone-200 rounded-lg bg-white"
+                >
+                  取消
+                </button>
+                <button
+                  type="submit"
+                  disabled={isLoading || !newFileName.trim()}
+                  className="flex-[2] py-2 bg-shikoku-indigo text-white font-bold rounded-lg hover:bg-indigo-800 transition-colors disabled:opacity-50 text-sm"
+                >
+                  建立
+                </button>
               </div>
             </form>
           )}
