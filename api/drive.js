@@ -1,6 +1,6 @@
 import { google } from 'googleapis';
 
-const SCOPES = ['https://www.googleapis.com/auth/drive']; // Broadened scope slightly to ensure visibility
+const SCOPES = ['https://www.googleapis.com/auth/drive']; 
 const ROOT_FOLDER_NAME = 'TravelBook';
 
 // Helper: robust key cleaning for Vercel Env Vars
@@ -154,16 +154,23 @@ export default async function handler(req, res) {
           requestBody: {
             name: name,
             mimeType: 'application/json',
-            parents: [folderId]
+            parents: [folderId] // Verify this matches userFolderId
           },
           media: {
             mimeType: 'application/json',
             body: JSON.stringify(data, null, 2)
           },
-          fields: 'id',
+          fields: 'id, parents', // Request parents back to verify
           supportsAllDrives: true
         });
-        return res.status(200).json({ id: createRes.data.id });
+        
+        // Sanity Check
+        const createdFile = createRes.data;
+        if (!createdFile.parents || !createdFile.parents.includes(folderId)) {
+             console.warn(`File created but parent mismatch. Expected ${folderId}, got ${createdFile.parents}`);
+        }
+
+        return res.status(200).json({ id: createdFile.id });
       }
     }
 
@@ -171,7 +178,6 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Drive API Error:', error);
-    // Return specific error message to help debugging
     return res.status(500).json({ error: error.message, stack: error.stack });
   }
 }

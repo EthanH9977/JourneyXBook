@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { User, Calendar, Cloud, Save, FileJson, RefreshCw, ArrowRightLeft } from 'lucide-react';
+import { User, Calendar, Cloud, Save, FileJson, RefreshCw, Plus, Minus } from 'lucide-react';
 
 interface SettingsViewProps {
   currentUser: string | null;
@@ -11,6 +10,9 @@ interface SettingsViewProps {
   onExport: () => void;
   onImport: () => void;
   isOfflineMode: boolean;
+  onAddDay: () => void;
+  onRemoveDay: () => void;
+  totalDays: number;
 }
 
 const SettingsView: React.FC<SettingsViewProps> = ({
@@ -21,7 +23,10 @@ const SettingsView: React.FC<SettingsViewProps> = ({
   onSync,
   onExport,
   onImport,
-  isOfflineMode
+  isOfflineMode,
+  onAddDay,
+  onRemoveDay,
+  totalDays
 }) => {
   return (
     <div className="px-5 py-8 max-w-xl mx-auto min-h-[80vh] flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -83,6 +88,21 @@ const SettingsView: React.FC<SettingsViewProps> = ({
             >
                 更換
             </button>
+         </div>
+
+         {/* Day Management Subsection */}
+         <div className="px-5 pb-5 pt-0">
+             <div className="bg-stone-50 rounded-xl p-3 flex items-center justify-between">
+                 <span className="text-sm font-bold text-stone-600">總天數：{totalDays} 天</span>
+                 <div className="flex gap-2">
+                     <button onClick={onRemoveDay} className="w-8 h-8 flex items-center justify-center bg-white border border-stone-200 rounded-lg text-stone-500 hover:text-red-500 hover:border-red-200 transition-colors">
+                         <Minus size={16} />
+                     </button>
+                     <button onClick={onAddDay} className="w-8 h-8 flex items-center justify-center bg-white border border-stone-200 rounded-lg text-stone-500 hover:text-shikoku-indigo hover:border-indigo-200 transition-colors">
+                         <Plus size={16} />
+                     </button>
+                 </div>
+             </div>
          </div>
       </section>
 

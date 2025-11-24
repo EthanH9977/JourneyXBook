@@ -10,14 +10,45 @@ export const getIconForType = (type: EventType) => {
     case EventType.BUS: return <Bus size={18} />;
     case EventType.HOTEL: return <Hotel size={18} />;
     case EventType.FOOD: return <Utensils size={18} />;
-    case EventType.SHOPPING: return <ShoppingBag size={18} />; // Used for Fun/Pachinko as well or Shopping
+    case EventType.SHOPPING: return <ShoppingBag size={18} />;
     case EventType.WALKING: return <MapPin size={18} />;
     case EventType.SIGHTSEEING: return <Camera size={18} />;
     default: return <Camera size={18} />;
   }
 };
 
-export const INITIAL_ITINERARY: DayItinerary[] = [
+// Helper to generate an empty itinerary
+export const generateEmptyItinerary = (days: number, startDateStr: string): DayItinerary[] => {
+  const result: DayItinerary[] = [];
+  const startDate = new Date(startDateStr);
+  
+  const weekDays = ["(日)", "(一)", "(二)", "(三)", "(四)", "(五)", "(六)"];
+
+  for (let i = 0; i < days; i++) {
+    const currentDate = new Date(startDate);
+    currentDate.setDate(startDate.getDate() + i);
+    
+    // Format YYYY-MM-DD
+    const yyyy = currentDate.getFullYear();
+    const mm = String(currentDate.getMonth() + 1).padStart(2, '0');
+    const dd = String(currentDate.getDate()).padStart(2, '0');
+    const dateStr = `${yyyy}-${mm}-${dd}`;
+
+    // Format Display Date like "2/13 (五)"
+    const displayDate = `${currentDate.getMonth() + 1}/${currentDate.getDate()} ${weekDays[currentDate.getDay()]}`;
+
+    result.push({
+      dayId: i + 1,
+      dateStr: dateStr,
+      displayDate: displayDate,
+      region: "待定地點",
+      events: []
+    });
+  }
+  return result;
+};
+
+export const SHIKOKU_DEMO_DATA: DayItinerary[] = [
   {
     dayId: 1,
     dateStr: "2026-02-13",

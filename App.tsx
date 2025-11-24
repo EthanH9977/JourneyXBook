@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import Hero from './components/Hero';
 import TimelineItem from './components/TimelineItem';
@@ -8,7 +7,7 @@ import InfoModal from './components/InfoModal';
 import UserModal from './components/UserModal';
 import FileSelectorModal from './components/FileSelectorModal';
 import SettingsView from './components/SettingsView';
-import { INITIAL_ITINERARY } from './constants';
+import { SHIKOKU_DEMO_DATA, generateEmptyItinerary } from './constants';
 import { ItineraryItem, DayItinerary, EventType } from './types';
 import { Plus, Loader2 } from 'lucide-react';
 import { 
@@ -27,7 +26,7 @@ type AppState = 'select_user' | 'select_file' | 'loading_file' | 'ready';
 
 const App: React.FC = () => {
   // Data State
-  const [itinerary, setItinerary] = useState<DayItinerary[]>(INITIAL_ITINERARY);
+  const [itinerary, setItinerary] = useState<DayItinerary[]>(SHIKOKU_DEMO_DATA);
   const [currentDayId, setCurrentDayId] = useState<number>(1);
   
   // App Flow State
@@ -99,13 +98,17 @@ const App: React.FC = () => {
     }
   };
 
-  const handleCreateFile = async (fileName: string) => {
+  const handleCreateFile = async (fileName: string, days: number, startDate: string) => {
     setDriveLoading(true);
     try {
       if (!userFolderId) throw new Error("No user folder");
-      const newFileId = await saveToDrive(INITIAL_ITINERARY, fileName, userFolderId, null);
       
-      setItinerary(INITIAL_ITINERARY);
+      // Generate blank itinerary based on user input
+      const newItinerary = generateEmptyItinerary(days, startDate);
+      
+      const newFileId = await saveToDrive(newItinerary, fileName, userFolderId, null);
+      
+      setItinerary(newItinerary);
       setCurrentFileId(newFileId);
       setCurrentFileName(fileName);
       setAppState('ready');
@@ -141,6 +144,41 @@ const App: React.FC = () => {
     }
   };
 
+  // --- Structure Management ---
+
+  const handleAddDay = () => {
+     setItinerary(prev => {
+        const lastDay = prev[prev.length - 1];
+        const nextDate = new Date(lastDay.dateStr);
+        nextDate.setDate(nextDate.getDate() + 1);
+        
+        const yyyy = nextDate.getFullYear();
+        const mm = String(nextDate.getMonth() + 1).padStart(2, '0');
+        const dd = String(nextDate.getDate()).padStart(2, '0');
+        const weekDays = ["(日)", "(一)", "(二)", "(三)", "(四)", "(五)", "(六)"];
+        
+        const newDay: DayItinerary = {
+            dayId: lastDay.dayId + 1,
+            dateStr: `${yyyy}-${mm}-${dd}`,
+            displayDate: `${nextDate.getMonth() + 1}/${nextDate.getDate()} ${weekDays[nextDate.getDay()]}`,
+            region: "待定地點",
+            events: []
+        };
+        return [...prev, newDay];
+     });
+     alert("已新增一天至行程最後");
+  };
+
+  const handleRemoveDay = () => {
+     if (itinerary.length <= 1) {
+         alert("至少需要保留一天");
+         return;
+     }
+     if (window.confirm("確定要刪除最後一天的行程嗎？裡面的活動也會被刪除。")) {
+         setItinerary(prev => prev.slice(0, -1));
+     }
+  };
+
   // --- Local Data Handlers ---
 
   const handleExport = () => {
@@ -149,7 +187,7 @@ const App: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${currentFileName || 'shikoku-backup'}.json`;
+    link.download = `${currentFileName || 'travel-backup'}.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -291,6 +329,9 @@ const App: React.FC = () => {
           onExport={handleExport}
           onImport={() => fileInputRef.current?.click()}
           isOfflineMode={isOfflineMode}
+          onAddDay={handleAddDay}
+          onRemoveDay={handleRemoveDay}
+          totalDays={itinerary.length}
         />
       ) : (
         // --- Normal Timeline View ---

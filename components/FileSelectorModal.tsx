@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { FileText, Plus, Loader2, Calendar, HardDrive } from 'lucide-react';
+import { FileText, Plus, Loader2, Calendar, HardDrive, Clock } from 'lucide-react';
 import { DriveFile } from '../services/googleDriveService';
 
 interface FileSelectorModalProps {
   files: DriveFile[];
   username: string;
   onSelect: (fileId: string, fileName: string) => void;
-  onCreate: (fileName: string) => void;
+  onCreate: (fileName: string, days: number, startDate: string) => void;
   isLoading: boolean;
   onSwitchUser: () => void;
   isOfflineMode: boolean;
@@ -22,12 +22,14 @@ const FileSelectorModal: React.FC<FileSelectorModalProps> = ({
   isOfflineMode
 }) => {
   const [newFileName, setNewFileName] = useState('');
+  const [days, setDays] = useState(5);
+  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
   const [isCreating, setIsCreating] = useState(false);
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
     if (newFileName.trim()) {
-      onCreate(newFileName.trim());
+      onCreate(newFileName.trim(), days, startDate);
     }
   };
 
@@ -104,31 +106,61 @@ const FileSelectorModal: React.FC<FileSelectorModalProps> = ({
             </div>
           ) : (
             <form onSubmit={handleCreate} className="space-y-3 animate-in slide-in-from-bottom-2">
-              <label className="block text-xs font-bold text-stone-500 ml-1">新行程名稱</label>
-              <div className="flex gap-2">
+              <div>
+                <label className="block text-xs font-bold text-stone-500 mb-1">新行程名稱</label>
                 <input
                   type="text"
                   value={newFileName}
                   onChange={(e) => setNewFileName(e.target.value)}
-                  placeholder="例如：四國環島 2026"
+                  placeholder="例如：東京五日遊"
                   autoFocus
-                  className="flex-1 p-3 bg-white border border-stone-300 rounded-xl text-sm font-bold focus:ring-2 focus:ring-shikoku-indigo outline-none"
+                  className="w-full p-2 bg-white border border-stone-300 rounded-lg text-sm font-bold focus:ring-2 focus:ring-shikoku-indigo outline-none"
                 />
-                <button
-                  type="submit"
-                  disabled={isLoading || !newFileName.trim()}
-                  className="px-4 bg-shikoku-indigo text-white rounded-xl hover:bg-indigo-800 transition-colors disabled:opacity-50"
-                >
-                  <Plus size={24} />
-                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => setIsCreating(false)}
-                className="w-full text-xs text-stone-400 hover:text-stone-600 py-2"
-              >
-                取消
-              </button>
+
+              <div className="flex gap-2">
+                 <div className="flex-1">
+                    <label className="block text-xs font-bold text-stone-500 mb-1">天數</label>
+                    <div className="relative">
+                        <select 
+                            value={days} 
+                            onChange={(e) => setDays(Number(e.target.value))}
+                            className="w-full p-2 bg-white border border-stone-300 rounded-lg text-sm appearance-none focus:ring-2 focus:ring-shikoku-indigo outline-none"
+                        >
+                            {Array.from({length: 30}, (_, i) => i + 1).map(d => (
+                                <option key={d} value={d}>{d} 天</option>
+                            ))}
+                        </select>
+                        <Clock size={14} className="absolute right-2 top-2.5 text-stone-400 pointer-events-none" />
+                    </div>
+                 </div>
+                 <div className="flex-1">
+                    <label className="block text-xs font-bold text-stone-500 mb-1">出發日期</label>
+                    <input 
+                        type="date" 
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        className="w-full p-2 bg-white border border-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-shikoku-indigo outline-none"
+                    />
+                 </div>
+              </div>
+
+              <div className="flex gap-2 pt-1">
+                 <button
+                    type="button"
+                    onClick={() => setIsCreating(false)}
+                    className="flex-1 py-2 text-xs text-stone-500 hover:text-stone-800 border border-stone-200 rounded-lg bg-white"
+                 >
+                    取消
+                 </button>
+                 <button
+                    type="submit"
+                    disabled={isLoading || !newFileName.trim()}
+                    className="flex-[2] py-2 bg-shikoku-indigo text-white font-bold rounded-lg hover:bg-indigo-800 transition-colors disabled:opacity-50 text-sm"
+                 >
+                    建立
+                 </button>
+              </div>
             </form>
           )}
         </div>
