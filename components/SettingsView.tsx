@@ -159,7 +159,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({
       <div className="mt-auto pt-8 pb-4 text-center space-y-4">
         <button
           onClick={onAdmin}
-          className="text-xs text-stone-300 hover:text-stone-500 transition-colors uppercase tracking-widest font-bold"
+          className="px-4 py-2 bg-stone-100 text-stone-600 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-stone-200 transition-colors"
         >
           JourneyX Book v1.0 • Admin
         </button>
