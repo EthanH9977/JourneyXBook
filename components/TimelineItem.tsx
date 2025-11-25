@@ -102,32 +102,24 @@ const TimelineItem: React.FC<TimelineItemProps> = ({ item, isLast, onEdit, onSho
             </p>
           )}
 
-          {/* Footer: Tags & Cost */}
-          <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-stone-50 mt-1">
-            {item.details && item.details.length > 0 ? (
-              <div className="flex flex-wrap gap-1.5">
-                {item.details.map((detail, idx) => (
-                  <button
-                    key={idx}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onShowDetails(item);
-                    }}
-                    className="flex items-center text-[10px] font-bold text-shikoku-indigo bg-indigo-50/50 px-2 py-1 rounded hover:bg-indigo-100 transition-colors"
-                  >
-                    <Info size={10} className="mr-1" />
-                    {detail.title}
-                  </button>
-                ))}
-              </div>
-            ) : <div></div>}
-
-            {item.cost && (
-              <span className="text-xs font-bold text-shikoku-gold bg-amber-50 px-1.5 py-0.5 rounded">
-                ¥{item.cost.toLocaleString()}
-              </span>
-            )}
-          </div>
+          {/* Footer: Tags */}
+          {item.details && item.details.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 pt-2 border-t border-stone-50 mt-1">
+              {item.details.map((detail, idx) => (
+                <button
+                  key={idx}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onShowDetails(item);
+                  }}
+                  className="flex items-center text-[10px] font-bold text-shikoku-indigo bg-indigo-50/50 px-2 py-1 rounded hover:bg-indigo-100 transition-colors"
+                >
+                  <Info size={10} className="mr-1" />
+                  {detail.title}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
