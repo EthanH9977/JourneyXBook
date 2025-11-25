@@ -1,6 +1,9 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import Hero from './components/Hero';
 import TimelineItem from './components/TimelineItem';
+import BookPage from './pages/BookPage';
+import AdminPage from './pages/AdminPage';
 import BottomNav from './components/BottomNav';
 import EditModal from './components/EditModal';
 import InfoModal from './components/InfoModal';
@@ -16,6 +19,7 @@ import {
   saveToFirebase,
   FirebaseFile
 } from './services/firebaseService';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; // Added Router imports
 
 const STORAGE_KEY = 'shikoku_travel_itinerary_v1';
 const USER_KEY = 'shikoku_travel_user';
@@ -83,7 +87,7 @@ const App: React.FC = () => {
     } catch (e: any) {
       console.error("Login failed", e);
       // Even if fallback fails (rare), we alert
-      alert(`登入失敗: ${e.message}`);
+      alert(`登入失敗: ${e.message} `);
     } finally {
       setDriveLoading(false);
     }
@@ -163,7 +167,7 @@ const App: React.FC = () => {
 
       // Critical: Update the file ID if it changed (e.g. from Mock to Real Cloud ID)
       if (newId !== currentFileId) {
-        console.log(`File ID updated: ${currentFileId} -> ${newId}`);
+        console.log(`File ID updated: ${currentFileId} -> ${newId} `);
         setCurrentFileId(newId);
       }
 
@@ -171,7 +175,7 @@ const App: React.FC = () => {
       loadingToast.className = "fixed top-4 left-1/2 -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded-full text-sm z-50";
     } catch (e: any) {
       console.error(e);
-      loadingToast.innerText = `儲存失敗: ${e.message}`;
+      loadingToast.innerText = `儲存失敗: ${e.message} `;
       loadingToast.className = "fixed top-4 left-1/2 -translate-x-1/2 bg-red-600 text-white px-4 py-2 rounded-full text-sm z-50";
     } finally {
       setTimeout(() => document.body.removeChild(loadingToast), 2000);
@@ -193,7 +197,7 @@ const App: React.FC = () => {
 
       const newDay: DayItinerary = {
         dayId: lastDay.dayId + 1,
-        dateStr: `${yyyy}-${mm}-${dd}`,
+        dateStr: `${yyyy} -${mm} -${dd} `,
         displayDate: `${nextDate.getMonth() + 1}/${nextDate.getDate()} ${weekDays[nextDate.getDay()]}`,
         region: "待定地點",
         events: []
