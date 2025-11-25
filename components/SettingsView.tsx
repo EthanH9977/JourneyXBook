@@ -12,7 +12,9 @@ interface SettingsViewProps {
   isOfflineMode: boolean;
   onAddDay: () => void;
   onRemoveDay: () => void;
+
   totalDays: number;
+  onAdmin: () => void;
 }
 
 const SettingsView: React.FC<SettingsViewProps> = ({
@@ -26,7 +28,9 @@ const SettingsView: React.FC<SettingsViewProps> = ({
   isOfflineMode,
   onAddDay,
   onRemoveDay,
-  totalDays
+  onRemoveDay,
+  totalDays,
+  onAdmin
 }) => {
   return (
     <div className="px-5 py-8 max-w-xl mx-auto min-h-[80vh] flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -152,8 +156,13 @@ const SettingsView: React.FC<SettingsViewProps> = ({
         </div>
       </section>
 
-      <div className="mt-auto pt-8 pb-4 text-center">
-        <p className="text-[10px] text-stone-300 uppercase tracking-widest">JourneyX Book v1.0</p>
+      <div className="mt-auto pt-8 pb-4 text-center space-y-4">
+        <button
+          onClick={onAdmin}
+          className="text-xs text-stone-300 hover:text-stone-500 transition-colors uppercase tracking-widest font-bold"
+        >
+          JourneyX Book v1.0 • Admin
+        </button>
       </div>
     </div>
   );

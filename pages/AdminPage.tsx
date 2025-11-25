@@ -1,8 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { Trash2, User, FileText, RefreshCw, AlertTriangle, Lock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Trash2, User, FileText, RefreshCw, AlertTriangle, Lock, ArrowLeft } from 'lucide-react';
 import { getAllUsersWithItineraries, deleteUserData, deleteFromFirebase, UserSummary } from '../services/firebaseService';
 
-const AdminPage: React.FC = () => {
+interface AdminPageProps {
+    onBack: () => void;
+}
+
+const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [password, setPassword] = useState('');
     const [users, setUsers] = useState<UserSummary[]>([]);
@@ -71,7 +75,13 @@ const AdminPage: React.FC = () => {
         return (
             <div className="min-h-screen bg-stone-100 flex items-center justify-center p-4 font-serif">
                 <div className="bg-white p-8 rounded-xl shadow-xl max-w-md w-full space-y-6">
-                    <div className="text-center space-y-2">
+                    <div className="text-center space-y-2 relative">
+                        <button
+                            onClick={onBack}
+                            className="absolute left-0 top-0 p-2 text-stone-400 hover:text-stone-600 hover:bg-stone-100 rounded-full transition-colors"
+                        >
+                            <ArrowLeft size={20} />
+                        </button>
                         <div className="w-16 h-16 bg-stone-200 rounded-full flex items-center justify-center mx-auto text-stone-600">
                             <Lock className="w-8 h-8" />
                         </div>
@@ -103,10 +113,18 @@ const AdminPage: React.FC = () => {
         <div className="min-h-screen bg-stone-50 font-serif text-stone-800">
             <header className="bg-white border-b border-stone-200 sticky top-0 z-10">
                 <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-                    <h1 className="text-xl font-bold flex items-center gap-2">
-                        <span className="w-8 h-8 bg-stone-800 text-white rounded-lg flex items-center justify-center text-sm">JX</span>
-                        後台管理
-                    </h1>
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={onBack}
+                            className="p-2 text-stone-500 hover:text-stone-800 hover:bg-stone-100 rounded-full transition-colors"
+                        >
+                            <ArrowLeft size={20} />
+                        </button>
+                        <h1 className="text-xl font-bold flex items-center gap-2">
+                            <span className="w-8 h-8 bg-stone-800 text-white rounded-lg flex items-center justify-center text-sm">JX</span>
+                            後台管理
+                        </h1>
+                    </div>
                     <button
                         onClick={fetchUsers}
                         disabled={loading}

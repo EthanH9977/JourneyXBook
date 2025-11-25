@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Hero from './components/Hero';
 import TimelineItem from './components/TimelineItem';
-import BookPage from './pages/BookPage';
 import AdminPage from './pages/AdminPage';
 import BottomNav from './components/BottomNav';
 import EditModal from './components/EditModal';
@@ -19,14 +18,14 @@ import {
   saveToFirebase,
   FirebaseFile
 } from './services/firebaseService';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; // Added Router imports
+
 
 const STORAGE_KEY = 'shikoku_travel_itinerary_v1';
 const USER_KEY = 'shikoku_travel_user';
 const SETTINGS_DAY_ID = 0; // Special ID for the Settings Page
 
 // App States
-type AppState = 'select_user' | 'select_file' | 'loading_file' | 'ready';
+type AppState = 'select_user' | 'select_file' | 'loading_file' | 'ready' | 'admin';
 
 const App: React.FC = () => {
   // Data State
@@ -354,6 +353,10 @@ const App: React.FC = () => {
     );
   }
 
+  if (appState === 'admin') {
+    return <AdminPage onBack={() => setAppState('ready')} />;
+  }
+
   return (
     <div className="min-h-screen pb-32 font-sans text-shikoku-ink bg-washi bg-fixed">
       {/* Hidden File Input for Import (Shared) */}
@@ -379,6 +382,7 @@ const App: React.FC = () => {
           onAddDay={handleAddDay}
           onRemoveDay={handleRemoveDay}
           totalDays={itinerary.length}
+          onAdmin={() => setAppState('admin')}
         />
       ) : (
         // --- Normal Timeline View ---
